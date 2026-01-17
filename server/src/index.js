@@ -21,16 +21,13 @@ dbConnect();
 const app=express();
 
 //middlewares
-app.use(
-cors({
-    origin: process.env.FRONTEND_URL,
+const corsOptions = {
+    origin: process.env.FRONTEND_URL, // Ensure this matches your live frontend URL exactly
     credentials: true,
-     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-})
-);
-app.options("/*", cors());
-
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Added OPTIONS
+    allowedHeaders: ["Content-Type", "Authorization"],    // Added specific headers
+};
+app.use(cors(corsOptions));
 app.use(express.json({limit: "100mb"}));
 app.use(express.urlencoded({limit:"100mb",extended :true}));
 app.set("trust proxy", 1);
