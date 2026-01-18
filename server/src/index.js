@@ -22,7 +22,10 @@ const app=express();
 
 //middlewares
 const corsOptions = {
-    origin: process.env.FRONTEND_URL, // Ensure this matches your live frontend URL exactly
+    origin: [
+    "https://finsave-ai-front.onrender.com",
+    "http://localhost:5173"
+  ], // Ensure this matches your live frontend URL exactly
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Added OPTIONS
     allowedHeaders: ["Content-Type", "Authorization"],    // Added specific headers
@@ -64,6 +67,12 @@ app.use("/api/notifications", notificationRoutes);
 
 //listen app
 const PORT= process.env.PORT || 7002;
+
+app.get("/", (req, res) => {
+  res.status(200).send("✅ FinSave Backend is running");
+});
+
+
 app.listen(PORT,()=>{
     console.log(`server is running on port ${PORT}`);
 });
