@@ -89,10 +89,12 @@ export const sendMoney = async (req, res) => {
     // Update balances
     const threshold =
       sender.preferences?.thresholdAmountForApproval || 5000;
-
+console.log("Amount:", amount);
+console.log("Threshold:", threshold);
     // 🚨 FRAUD CHECK BEFORE TRANSFER
     if (amount > threshold) {
-
+console.log("🚨 Fraud condition triggered");
+  console.log("📧 Email will be sent to:", sender.email);
       const senderTxn = await Transaction.create({
         userId: sender._id,
         sender: sender._id,
