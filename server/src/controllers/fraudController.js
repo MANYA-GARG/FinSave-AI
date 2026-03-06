@@ -34,14 +34,14 @@ export const approveFlaggedTransaction = async (req, res) => {
     txn.fraudFlag = false;
     await txn.save();
 
-    await FraudLog.findOneAndUpdate(
-      { transaction: txn._id },
-      {
-        resolved: true,
-        resolvedAt: new Date(),
-        resolvedBy: req.user._id,
-      }
-    );
+  await FraudLog.findOneAndUpdate(
+  { transaction: txn._id },
+  {
+    resolved: true,
+    resolvedAt: new Date(),
+    resolvedBy: req.user ? req.user._id : null,
+  }
+);
 if (req.method === "GET") {
   return res.send(`
     <h2>✅ Transaction Approved</h2>
@@ -80,18 +80,24 @@ export const rejectFlaggedTransaction = async (req, res) => {
       {
         resolved: true,
         resolvedAt: new Date(),
-        resolvedBy: req.user._id,
+        resolvedBy: req.user ? req.user._id : null,
         notes: "Rejected by user",
       }
     );
 
-    // No need to deduct again (money was never moved)
+    if (req.method === "GET") {
+      return res.send(`
+        <h2>❌ Transaction Rejected</h2>
+        <p>The transaction has been cancelled successfully.</p>
+      `);
+    }
+
     res.status(200).json({ message: "Transaction rejected and cancelled." });
+
   } catch (error) {
     res.status(500).json({ message: "Error rejecting transaction", error });
   }
 };
-
 // ✅ View all fraud logs for current user
 export const getMyFraudLogs = async (req, res) => {
   try {
