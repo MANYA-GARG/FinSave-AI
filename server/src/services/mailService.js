@@ -12,6 +12,10 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendApprovalEmail = async (to, txnId, amount, receiverName, description) => {
+  console.log("📨 sendApprovalEmail called");
+  console.log("Recipient:", to);
+  console.log("MAIL_USER:", process.env.MAIL_USER ? "Loaded" : "Missing");
+  console.log("MAIL_PASS:", process.env.MAIL_PASS ? "Loaded" : "Missin
   const approveUrl = `http://localhost:5173/approve/${txnId}`;
   const rejectUrl = `http://localhost:5173/reject/${txnId}`;
 
@@ -25,6 +29,7 @@ export const sendApprovalEmail = async (to, txnId, amount, receiverName, descrip
   `;
 
    try {
+       console.log("📡 Attempting to send email...");
     const info = await transporter.sendMail({
       from: process.env.MAIL_USER,
       to,
@@ -36,6 +41,7 @@ export const sendApprovalEmail = async (to, txnId, amount, receiverName, descrip
     console.log("📩 Message ID:", info.messageId);
     console.log("🧾 Preview URL (if ethereal):", nodemailer.getTestMessageUrl?.(info));
   } catch (err) {
+      console.error("❌ Failed to send email:", err);
     console.error("❌ Failed to send email:", err.message);
   }
 };
