@@ -15,7 +15,7 @@ export const sendApprovalEmail = async (to, txnId, amount, receiverName, descrip
   console.log("📨 sendApprovalEmail called");
   console.log("Recipient:", to);
   console.log("MAIL_USER:", process.env.MAIL_USER ? "Loaded" : "Missing");
-  console.log("MAIL_PASS:", process.env.MAIL_PASS ? "Loaded" : "Missin
+  console.log("MAIL_PASS:", process.env.MAIL_PASS ? "Loaded" : "Missing");
   const approveUrl = `http://localhost:5173/approve/${txnId}`;
   const rejectUrl = `http://localhost:5173/reject/${txnId}`;
 
