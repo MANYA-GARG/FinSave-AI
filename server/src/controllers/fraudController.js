@@ -29,8 +29,7 @@ export const approveFlaggedTransaction = async (req, res) => {
 
     await sender.save();
     await receiver.save();
-
-    txn.status = "approved_by_user";
+txn.status = "success";
     txn.fraudFlag = false;
     await txn.save();
 
