@@ -96,8 +96,8 @@ export const sendApprovalEmail = async (to, txnId, amount, receiverName, descrip
 
   console.log("📨 sendApprovalEmail called");
 
-const approveUrl = `https://finsave-ai-frontend.onrender.com/approve/${txnId}`;
-const rejectUrl = `https://finsave-ai-frontend.onrender.com/reject/${txnId}`;
+const approveUrl = `https://finsave-ai.onrender.com/${txnId}`;
+const rejectUrl = `https://finsave-ai.onrender.com/${txnId}`;
 
   const html = `
     <h2>🚨 Transaction Flagged</h2>
