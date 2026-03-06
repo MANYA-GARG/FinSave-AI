@@ -26,9 +26,25 @@ export const approveFlaggedTransaction = async (req, res) => {
     // Proceed with transfer
     sender.balance -= txn.amount;
     receiver.balance += txn.amount;
-
-    await sender.save();
+     await sender.save();
     await receiver.save();
+    // Create receiver credit transaction
+const receiverTxn = await Transaction.create({
+  userId: receiver._id,
+  sender: sender._id,
+  receiver: receiver._id,
+  amount: txn.amount,
+  description: txn.description,
+  transactionType: "transfer_credit",
+  relatedTransactionId: txn._id,
+  status: "success",
+  category: txn.category
+});
+
+// Link the sender transaction to receiver transaction
+txn.relatedTransactionId = receiverTxn._id;
+
+   
 txn.status = "success";
     txn.fraudFlag = false;
     await txn.save();
