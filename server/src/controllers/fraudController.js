@@ -42,8 +42,15 @@ export const approveFlaggedTransaction = async (req, res) => {
         resolvedBy: req.user._id,
       }
     );
+if (req.method === "GET") {
+  return res.send(`
+    <h2>✅ Transaction Approved</h2>
+    <p>The payment has been processed successfully.</p>
+  `);
+}
 
-    res.status(200).json({ message: "Transaction approved and completed." });
+res.status(200).json({ message: "Transaction approved and completed." });
+    // res.status(200).json({ message: "Transaction approved and completed." });
   } catch (error) {
     res.status(500).json({ message: "Error approving transaction", error });
   }
