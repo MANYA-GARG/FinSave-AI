@@ -87,8 +87,52 @@ export const sendMoney = async (req, res) => {
     if (!catDoc) return res.status(400).json({ message: "Category is required" });
  console.log("Category validated:", catDoc.name);
     // Update balances
+    const threshold =
+      sender.preferences?.thresholdAmountForApproval || 5000;
+
+    // 🚨 FRAUD CHECK BEFORE TRANSFER
+    if (amount > threshold) {
+
+      const senderTxn = await Transaction.create({
+        userId: sender._id,
+        sender: sender._id,
+        receiver: receiver._id,
+        amount,
+        description,
+        transactionType: "transfer_debit",
+        status: "flagged",
+        fraudFlag: true,
+        category: catDoc.name,
+      });
+
+      await FraudLog.create({
+        user: sender._id,
+        transaction: senderTxn._id,
+        reason: `Amount ₹${amount} exceeded threshold ₹${threshold}`,
+      });
+
+      console.log("⚠️ Sending email to:", sender.email);
+
+      await sendApprovalEmail(
+        sender.email,
+        senderTxn._id,
+        amount,
+        receiver.username,
+        description
+      );
+
+      return res.status(403).json({
+        message: "Transaction flagged for fraud. Awaiting approval.",
+        flagged: true,
+        transactionId: senderTxn._id,
+      });
+    }
+
+    // ✅ NORMAL TRANSFER (amount <= threshold)
+
     sender.balance -= amount;
     receiver.balance += amount;
+
     await sender.save();
     await receiver.save();
 
@@ -112,40 +156,19 @@ export const sendMoney = async (req, res) => {
       transactionType: "transfer_credit",
       relatedTransactionId: senderTxn._id,
       status: "success",
-       category: catDoc.name,
+      category: catDoc.name,
     });
 
     senderTxn.relatedTransactionId = receiverTxn._id;
-    await senderTxn.save();
-
-    const threshold = sender.preferences?.thresholdAmountForApproval || 5000;
-    if (amount > threshold) {
-      senderTxn.fraudFlag = true;
-      senderTxn.status = "flagged";
-      await senderTxn.save();
-
-      await FraudLog.create({
-        user: sender._id,
-        transaction: senderTxn._id,
-        reason: `Amount ₹${amount} exceeded threshold ₹${threshold}`,
-      });
-console.log("⚠️ Sending email to:", sender.email);
-       await sendApprovalEmail(sender.email, senderTxn._id, amount, receiver.username, description);
-
-      return res.status(403).json({
-        message: "Transaction flagged for fraud. Awaiting approval.",
-        flagged: true,
-        transactionId: senderTxn._id,
-      });
-    }
-
     await senderTxn.save();
 
     res.status(200).json({
       message: "Transaction successful",
       transactionId: senderTxn._id,
     });
+
   } catch (error) {
+    console.error("❌ Transaction error:", error);
     res.status(500).json({ message: "Transaction failed", error });
   }
 };
